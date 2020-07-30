@@ -1,0 +1,31 @@
+namespace CDLib
+{
+	interface IAudioCDTrack
+	{
+		String Name{ get; };
+		Windows.Foundation.TimeSpan Duration{ get; };
+		UInt32 TrackNumber{ get; };
+
+		void Play();
+		void Pause();
+		void Stop();
+	};
+
+	interface IAudioCD
+	{
+		IVectorView<IAudioCDTrack> Tracks{ get; };
+		Windows.Foundation.IReference<Char> DriveLetter{ get; };
+	};
+
+	interface IAudioCDPlayer requires Windows.Foundation.IClosable
+	{
+		IVectorView<IAudioCD> GetInsertedMedia();
+		Boolean IsMediaInserted{ get; };
+		Boolean IsMetadataSupported{ get; };
+	};
+
+	static runtimeclass AudioCDPlayer
+	{
+		static IAudioCDPlayer GetPlayer();
+	};
+}
