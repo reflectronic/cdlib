@@ -2,6 +2,8 @@
 #include "AudioCDPlayer.h"
 #include "AudioCDPlayer.g.cpp"
 
+#include "MCI.h"
+
 namespace winrt::CDLib::implementation
 {
     CDLib::IAudioCDPlayer AudioCDPlayer::GetPlayer()
@@ -9,7 +11,6 @@ namespace winrt::CDLib::implementation
         if (false)
         {
             // TODO: Windows media player backend
-            throw_hresult(0);
         }
 
         return make<MCIAudioCDPlayer>();

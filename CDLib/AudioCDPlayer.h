@@ -10,6 +10,7 @@ namespace winrt::CDLib::implementation
         static CDLib::IAudioCDPlayer GetPlayer();
     };
 }
+
 namespace winrt::CDLib::factory_implementation
 {
     struct AudioCDPlayer : AudioCDPlayerT<AudioCDPlayer, implementation::AudioCDPlayer>

@@ -2,7 +2,7 @@
 
 #include "AudioCDPlayer.h"
 
-struct MCIAudioCDPlayer : winrt::implements<winrt::CDLib::IAudioCDPlayer>
+struct MCIAudioCDPlayer : winrt::implements<MCIAudioCDPlayer, winrt::CDLib::IAudioCDPlayer>
 {
     bool IsMetadataSupported();
     bool IsMediaInserted();
@@ -10,17 +10,13 @@ struct MCIAudioCDPlayer : winrt::implements<winrt::CDLib::IAudioCDPlayer>
     void Close();
 };
 
-struct MCIAudioCD : winrt::implements<winrt::CDLib::IAudioCD>
+struct MCIAudioCD : winrt::implements<MCIAudioCD, winrt::CDLib::IAudioCD>
 {
     winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCDTrack> Tracks();
-    winrt::Windows::Foundation::IReference<wchar_t> DriveLetter();
-
-protected:
-    friend MCIAudioCDPlayer;
-    MCIAudioCD();
+    winrt::Windows::Foundation::IReference<char16_t> DriveLetter();
 };
 
-struct MCIAudioCDTrack : winrt::implements<winrt::CDLib::IAudioCDTrack>
+struct MCIAudioCDTrack : winrt::implements<MCIAudioCDTrack, winrt::CDLib::IAudioCDTrack>
 {
     winrt::hstring Name();
     winrt::Windows::Foundation::TimeSpan Duration();

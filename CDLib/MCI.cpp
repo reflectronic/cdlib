@@ -2,6 +2,7 @@
 #include "MCI.h"
 
 #include <mciapi.h>
+#pragma comment(lib, "Winmm.lib")
 
 bool MCIAudioCDPlayer::IsMetadataSupported()
 {
@@ -39,10 +40,6 @@ void MCIAudioCDPlayer::Close()
 {
 }
 
-MCIAudioCD::MCIAudioCD()
-{
-}
-
 winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCDTrack> MCIAudioCD::Tracks()
 {
 	MCIERROR mciError;
@@ -72,10 +69,8 @@ winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCDTrack
 		}
 	}
 }
-
-winrt::Windows::Foundation::IReference<wchar_t> MCIAudioCD::DriveLetter()
+winrt::Windows::Foundation::IReference<char16_t> MCIAudioCD::DriveLetter()
 {
-	// TODO: Find out correct way to do this
 	return nullptr;
 }
 
