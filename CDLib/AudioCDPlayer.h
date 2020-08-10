@@ -1,4 +1,5 @@
 #pragma once
+
 #include "AudioCDPlayer.g.h"
 
 namespace winrt::CDLib::implementation
