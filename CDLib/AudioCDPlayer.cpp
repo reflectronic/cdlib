@@ -2,17 +2,18 @@
 #include "AudioCDPlayer.h"
 #include "AudioCDPlayer.g.cpp"
 
-#include "MCI.h"
+//#include "MCI.h"
+#include "CDLibWMP.h"
 
 namespace winrt::CDLib::implementation
 {
     CDLib::IAudioCDPlayer AudioCDPlayer::GetPlayer()
     {
-        if (false)
+        if (true)
         {
-            // TODO: Windows media player backend
+            return make<WMPAudioCDPlayer>();
         }
 
-        return make<MCIAudioCDPlayer>();
+        //return make<MCIAudioCDPlayer>();
     }
 }

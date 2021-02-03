@@ -3,6 +3,7 @@
 #include "AudioCDPlayer.h"
 #include <mciapi.h>
 
+#if 0
 struct MCIAudioCDPlayer : winrt::implements<MCIAudioCDPlayer, winrt::CDLib::IAudioCDPlayer>
 {
     MCIAudioCDPlayer();
@@ -41,3 +42,4 @@ private:
     winrt::Windows::Foundation::TimeSpan duration;
     uint32_t trackNumber;
 };
+#endif

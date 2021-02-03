@@ -14,11 +14,14 @@
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
     <ClCompile Include="AudioCDPlayer.cpp" />
     <ClCompile Include="MCI.cpp" />
+    <ClCompile Include="CDLibWMP.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="AudioCDPlayer.h" />
     <ClInclude Include="MCI.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="CDLibWMP.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CDLib.def" />

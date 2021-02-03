@@ -5,6 +5,7 @@
 
 #pragma comment(lib, "Winmm.lib")
 
+#if 0
 MCIAudioCDPlayer::MCIAudioCDPlayer()
 {
 	MCI_OPEN_PARMS openParms = { 0 };
@@ -49,6 +50,8 @@ winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCD> MCI
 
 	return cds.GetView();
 }
+
+// Maybe we should try setting the project settings to ANSI to see if that fixes this problem...
 
 void MCIAudioCDPlayer::Close()
 {
@@ -100,6 +103,7 @@ winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCDTrack
 
 winrt::Windows::Foundation::IReference<char16_t> MCIAudioCD::DriveLetter()
 {
+	return 'D';
 	return nullptr;
 }
 
@@ -135,3 +139,9 @@ void MCIAudioCDTrack::Pause()
 void MCIAudioCDTrack::Stop()
 {
 }
+
+MCIAudioCDTrack::MCIAudioCDTrack(uint32_t trackNumber)
+{
+
+}
+#endif

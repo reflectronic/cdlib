@@ -115,8 +115,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AudioCDPlayer.h" />
+    <ClInclude Include="Factory.h" />
     <ClInclude Include="MCI.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="CDLibWMP.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AudioCDPlayer.cpp" />
@@ -125,6 +127,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="CDLibWMP.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="CDLib.idl" />
@@ -151,6 +154,6 @@
     <Error Condition="!Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.200729.8\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.CppWinRT.2.0.200729.8\build\native\Microsoft.Windows.CppWinRT.targets'))" />
   </Target>
   <Target Name="ProduceHeaderProjections" AfterTargets="Build">
-      <Exec Command="$(CppWinRTPath)\cppwinrt.exe -out $(MSBuildProjectDirectory)\..\include -in $(CppWinRTProjectWinMD) -in $(WindowsTargetPlatformVersion)" />
+    <Exec Command="$(CppWinRTPath)\cppwinrt.exe -out $(MSBuildProjectDirectory)\..\include -in $(CppWinRTProjectWinMD) -in $(WindowsTargetPlatformVersion)" />
   </Target>
 </Project>

@@ -1,5 +1,9 @@
 #pragma once
+<<<<<<< HEAD
 
+=======
+#include "pch.h"
+>>>>>>> 45b7514... Use WMP for CD audio
 #include "AudioCDPlayer.g.h"
 
 namespace winrt::CDLib::implementation
@@ -12,9 +16,4 @@ namespace winrt::CDLib::implementation
     };
 }
 
-namespace winrt::CDLib::factory_implementation
-{
-    struct AudioCDPlayer : AudioCDPlayerT<AudioCDPlayer, implementation::AudioCDPlayer>
-    {
-    };
-}
+FACTORY(winrt::CDLib, AudioCDPlayer);
