@@ -24,9 +24,8 @@ namespace CDLib
 	{
 		IVectorView<IAudioCDDrive> GetDrives();
 
-		IAudioCDTrack PlayingTrack{ get; };
 		void PlayTrack(IAudioCDTrack track);
-		void Play();
+		void Resume();
 		void Pause();
 	};
 

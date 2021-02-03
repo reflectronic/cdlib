@@ -1,139 +1,127 @@
 ﻿#include "pch.h"
 #include "CDLibWMP.h"
 
-using namespace winrt;
-using namespace CDLib;
-
-struct WMPAudioCDPlayerPrivate {
-	com_ptr<IWMPCdromCollection> cdromCollection;
-	Windows::Foundation::Collections::IVector<IAudioCDDrive> drives;
-	IAudioCDTrack playingTrack;
-
-
-};
+namespace cdlib = winrt::CDLib;
 
 WMPAudioCDPlayer::WMPAudioCDPlayer()
-	: d(new WMPAudioCDPlayerPrivate)
+	: cdromCollection(winrt::create_instance<IWMPCdromCollection>(winrt::guid_of<WindowsMediaPlayer>())),
+	  player(winrt::create_instance<IWMPPlayer>(winrt::guid_of<WindowsMediaPlayer>())),
+	  drives(winrt::single_threaded_vector<cdlib::IAudioCDDrive>())
 {
-	d->cdromCollection = create_instance<IWMPCdromCollection>(winrt::guid_of<WindowsMediaPlayer>());
-	d->drives = single_threaded_vector<IAudioCDDrive>();
-
 	long count;
-	check_hresult(d->cdromCollection->get_count(&count));
+	winrt::check_hresult(cdromCollection->get_count(&count));
 
 	for (int i = 0; i < count; i++) 
 	{
-		com_ptr<IWMPCdrom> cdrom;
-		check_hresult(d->cdromCollection->item(i, cdrom.put()));
-		d->drives.Append(WMPAudioCDDrive(cdrom));
+		winrt::com_ptr<IWMPCdrom> cdrom;
+		winrt::check_hresult(cdromCollection->item(i, cdrom.put()));
+		drives.Append(winrt::make<WMPAudioCDDrive>(cdrom));
 	}
 }
 
-WMPAudioCDPlayer::~WMPAudioCDPlayer()
+wfc::IVectorView<cdlib::IAudioCDDrive> WMPAudioCDPlayer::GetDrives()
 {
-	delete d;
+	return drives.GetView();
 }
 
-Windows::Foundation::Collections::IVectorView<IAudioCDDrive> WMPAudioCDPlayer::GetDrives()
+void WMPAudioCDPlayer::PlayTrack(const cdlib::IAudioCDTrack& track)
 {
-	return d->drives.GetView();
-}
-
-IAudioCDTrack WMPAudioCDPlayer::PlayingTrack()
-{
-	return d->playingTrack;
-}
-
-void WMPAudioCDPlayer::PlayTrack(const IAudioCDTrack& track)
-{
-	d->playingTrack = track;
-	Play();
-}
-
-void WMPAudioCDPlayer::Play()
-{
-	
+	auto wmpTrack = track.as<WMPAudioCDTrack>();
+	get_controls()->playItem(wmpTrack->wmpMedia.get());
 }
 
 void WMPAudioCDPlayer::Pause()
 {
+	get_controls()->pause();
+}
+
+void WMPAudioCDPlayer::Resume()
+{
+	get_controls()->play();
+}
+
+
+WMPAudioCDDrive::WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> const& cdrom)
+	: cd(cdrom)
+{
+}
+
+
+winrt::Windows::Foundation::IReference<char16_t> WMPAudioCDDrive::DriveLetter()
+{
+	wil::unique_bstr name;
+	cd->get_driveSpecifier(name.put());
 	
+	if (SysStringLen(name.get()) < 1)
+	{
+		return nullptr;
+	}
+
+	return name.get()[0];
 }
 
-struct WMPAudioCDDrivePrivate {
-	com_ptr<IWMPCdrom> cd;
-};
-
-WMPAudioCDDrive::WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> cdrom)
-	: d(new WMPAudioCDDrivePrivate)
+cdlib::IAudioCD WMPAudioCDDrive::InsertedMedia()
 {
-	d->cd = cdrom;
+	winrt::com_ptr<IWMPPlaylist> playlist;
+	cd->get_playlist(playlist.put());
+	return winrt::make<WMPAudioCD>(playlist);
 }
 
-WMPAudioCDDrive::~WMPAudioCDDrive()
+WMPAudioCD::WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& playlist) 
+	: wmpTrackList(playlist),
+	  tracks(winrt::single_threaded_vector<cdlib::IAudioCDTrack>())
 {
-	delete d;
+	long count;
+	winrt::check_hresult(playlist->get_count(&count));
+	
+	for (int i = 0; i < count; i++)
+	{
+		winrt::com_ptr<IWMPMedia> track;
+		playlist->get_item(i, track.put());
+		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1));
+	}
 }
 
-Windows::Foundation::IReference<char16_t> WMPAudioCDDrive::DriveLetter()
+winrt::Windows::Foundation::Collections::IVectorView<cdlib::IAudioCDTrack> WMPAudioCD::Tracks()
 {
-	return Windows::Foundation::IReference<char16_t>();
+	return tracks.GetView();
 }
 
-IAudioCD WMPAudioCDDrive::InsertedMedia()
+template<typename T>
+winrt::hstring get_name(winrt::com_ptr<T> const& namedObj)
 {
-	return IAudioCD();
+	wil::unique_bstr name;
+	winrt::check_hresult(namedObj->get_name(name.put()));
+
+	return winrt::to_hstring(name.get());
 }
 
-struct WMPAudioCDPrivate {
 
-};
-
-WMPAudioCD::WMPAudioCD()
-	: d(new WMPAudioCDPrivate())
+winrt::hstring WMPAudioCD::Name()
 {
+	return get_name(wmpTrackList);
 }
 
-WMPAudioCD::~WMPAudioCD()
-{
-	delete d;
-}
 
-Windows::Foundation::Collections::IVectorView<IAudioCDTrack> WMPAudioCD::Tracks()
-{
-	return Windows::Foundation::Collections::IVectorView<IAudioCDTrack>();
-}
-
-hstring WMPAudioCD::Name()
-{
-	return hstring();
-}
-
-struct WMPAudioCDTrackPrivate {
-
-};
-
-WMPAudioCDTrack::WMPAudioCDTrack()
-	: d(new WMPAudioCDTrackPrivate())
+WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track)
+	: wmpMedia(media),
+	  trackNumber(track)
 {
 }
 
-WMPAudioCDTrack::~WMPAudioCDTrack()
+winrt::hstring WMPAudioCDTrack::Name()
 {
-	delete d;
+	return get_name(wmpMedia);
 }
 
-hstring WMPAudioCDTrack::Name()
+wf::TimeSpan WMPAudioCDTrack::Duration()
 {
-	return hstring();
-}
-
-Windows::Foundation::TimeSpan WMPAudioCDTrack::Duration()
-{
-	return Windows::Foundation::TimeSpan();
+	double seconds;
+	winrt::check_hresult(wmpMedia->get_duration(&seconds));
+	return std::chrono::duration_cast<wf::TimeSpan>(std::chrono::duration<double>(seconds));
 }
 
 uint32_t WMPAudioCDTrack::TrackNumber()
 {
-	return uint32_t();
+	return trackNumber;
 }
