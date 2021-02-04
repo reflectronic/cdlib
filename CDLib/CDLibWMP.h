@@ -41,6 +41,8 @@ private:
 
 struct WMPAudioCD : winrt::implements<WMPAudioCD, winrt::CDLib::IAudioCD>
 {
+	friend struct WMPAudioCDPlayer;
+
 	WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& tracks);
 
 	winrt::Windows::Foundation::Collections::IVectorView<winrt::CDLib::IAudioCDTrack> Tracks();
@@ -56,13 +58,14 @@ struct WMPAudioCDTrack : winrt::implements<WMPAudioCDTrack, winrt::CDLib::IAudio
 {
 	friend struct WMPAudioCDPlayer;
 
-	WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track);
+	WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track, winrt::CDLib::IAudioCD parentCd);
 
 	winrt::hstring Name();
 	winrt::Windows::Foundation::TimeSpan Duration();
 	uint32_t TrackNumber();
 
 private:
+	winrt::CDLib::IAudioCD parentCd;
 	winrt::com_ptr<IWMPMedia> wmpMedia;
 	uint32_t trackNumber;
 };

@@ -4,10 +4,11 @@
 namespace cdlib = winrt::CDLib;
 
 WMPAudioCDPlayer::WMPAudioCDPlayer()
-	: cdromCollection(winrt::create_instance<IWMPCdromCollection>(winrt::guid_of<WindowsMediaPlayer>())),
-	  player(winrt::create_instance<IWMPPlayer>(winrt::guid_of<WindowsMediaPlayer>())),
+	 : player(winrt::create_instance<IWMPPlayer>(winrt::guid_of<WindowsMediaPlayer>())),
 	  drives(winrt::single_threaded_vector<cdlib::IAudioCDDrive>())
 {
+	player->get_cdromCollection(cdromCollection.put());
+
 	long count;
 	winrt::check_hresult(cdromCollection->get_count(&count));
 
@@ -27,17 +28,18 @@ wfc::IVectorView<cdlib::IAudioCDDrive> WMPAudioCDPlayer::GetDrives()
 void WMPAudioCDPlayer::PlayTrack(const cdlib::IAudioCDTrack& track)
 {
 	auto wmpTrack = track.as<WMPAudioCDTrack>();
-	get_controls()->playItem(wmpTrack->wmpMedia.get());
+	winrt::check_hresult(player->put_currentPlaylist(wmpTrack->parentCd.as<WMPAudioCD>()->wmpTrackList.get()));
+	winrt::check_hresult(get_controls()->playItem(wmpTrack->wmpMedia.get()));
 }
 
 void WMPAudioCDPlayer::Pause()
 {
-	get_controls()->pause();
+	winrt::check_hresult(get_controls()->pause());
 }
 
 void WMPAudioCDPlayer::Resume()
 {
-	get_controls()->play();
+	winrt::check_hresult(get_controls()->play());
 }
 
 
@@ -63,7 +65,7 @@ winrt::Windows::Foundation::IReference<char16_t> WMPAudioCDDrive::DriveLetter()
 cdlib::IAudioCD WMPAudioCDDrive::InsertedMedia()
 {
 	winrt::com_ptr<IWMPPlaylist> playlist;
-	cd->get_playlist(playlist.put());
+	winrt::check_hresult(cd->get_playlist(playlist.put()));
 	return winrt::make<WMPAudioCD>(playlist);
 }
 
@@ -77,8 +79,8 @@ WMPAudioCD::WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& playlist)
 	for (int i = 0; i < count; i++)
 	{
 		winrt::com_ptr<IWMPMedia> track;
-		playlist->get_item(i, track.put());
-		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1));
+		winrt::check_hresult(playlist->get_item(i, track.put()));
+		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1, *this));
 	}
 }
 
@@ -103,9 +105,10 @@ winrt::hstring WMPAudioCD::Name()
 }
 
 
-WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track)
+WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track, cdlib::IAudioCD parentCd)
 	: wmpMedia(media),
-	  trackNumber(track)
+	  trackNumber(track),
+	parentCd(parentCd)
 {
 }
 
