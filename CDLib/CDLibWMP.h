@@ -6,7 +6,7 @@
 struct WMPAudioCDPlayerPrivate;
 struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAudioCDPlayer, winrt::non_agile>
 {
-	WMPAudioCDPlayer();
+	WMPAudioCDPlayer(winrt::com_ptr<IWMPPlayer> const& player);
 
 	wfc::IVectorView<winrt::CDLib::IAudioCDDrive> GetDrives();
 

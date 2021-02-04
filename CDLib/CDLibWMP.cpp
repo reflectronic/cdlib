@@ -3,9 +3,9 @@
 
 namespace cdlib = winrt::CDLib;
 
-WMPAudioCDPlayer::WMPAudioCDPlayer()
-	 : player(winrt::create_instance<IWMPPlayer>(winrt::guid_of<WindowsMediaPlayer>())),
-	  drives(winrt::single_threaded_vector<cdlib::IAudioCDDrive>())
+WMPAudioCDPlayer::WMPAudioCDPlayer(winrt::com_ptr<IWMPPlayer> const& wmpPlayer)
+	 : player(wmpPlayer),
+	   drives(winrt::single_threaded_vector<cdlib::IAudioCDDrive>())
 {
 	player->get_cdromCollection(cdromCollection.put());
 
@@ -42,12 +42,10 @@ void WMPAudioCDPlayer::Resume()
 	winrt::check_hresult(get_controls()->play());
 }
 
-
 WMPAudioCDDrive::WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> const& cdrom)
 	: cd(cdrom)
 {
 }
-
 
 winrt::Windows::Foundation::IReference<char16_t> WMPAudioCDDrive::DriveLetter()
 {
@@ -103,12 +101,10 @@ winrt::hstring get_name(winrt::com_ptr<T> const& namedObj)
 	return winrt::to_hstring(name.get());
 }
 
-
 winrt::hstring WMPAudioCD::Name()
 {
 	return get_name(wmpTrackList);
 }
-
 
 WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track, cdlib::IAudioCD parentCd)
 	: wmpMedia(media),
