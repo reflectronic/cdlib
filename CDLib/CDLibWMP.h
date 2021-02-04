@@ -4,7 +4,7 @@
 #include <wmp.h>
 
 struct WMPAudioCDPlayerPrivate;
-struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAudioCDPlayer>
+struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAudioCDPlayer, winrt::non_agile>
 {
 	WMPAudioCDPlayer();
 
@@ -28,7 +28,7 @@ private:
 	}
 };
 
-struct WMPAudioCDDrive : winrt::implements<WMPAudioCDDrive, winrt::CDLib::IAudioCDDrive>
+struct WMPAudioCDDrive : winrt::implements<WMPAudioCDDrive, winrt::CDLib::IAudioCDDrive, winrt::non_agile>
 {
 	WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> const& cdrom);
 
@@ -39,7 +39,7 @@ private:
 	winrt::com_ptr<IWMPCdrom> cd;
 };
 
-struct WMPAudioCD : winrt::implements<WMPAudioCD, winrt::CDLib::IAudioCD>
+struct WMPAudioCD : winrt::implements<WMPAudioCD, winrt::CDLib::IAudioCD, winrt::non_agile>
 {
 	friend struct WMPAudioCDPlayer;
 
@@ -54,7 +54,7 @@ private:
 
 };
 
-struct WMPAudioCDTrack : winrt::implements<WMPAudioCDTrack, winrt::CDLib::IAudioCDTrack>
+struct WMPAudioCDTrack : winrt::implements<WMPAudioCDTrack, winrt::CDLib::IAudioCDTrack, winrt::non_agile>
 {
 	friend struct WMPAudioCDPlayer;
 
