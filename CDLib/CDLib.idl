@@ -16,6 +16,7 @@ namespace CDLib
 	interface IAudioCDDrive
 	{
 		Windows.Foundation.IReference<Char> DriveLetter{ get; };
+		void Eject();
 
 		IAudioCD InsertedMedia{ get; };
 	};

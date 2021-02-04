@@ -35,6 +35,8 @@ struct WMPAudioCDDrive : winrt::implements<WMPAudioCDDrive, winrt::CDLib::IAudio
     wf::IReference<char16_t> DriveLetter();
 	winrt::CDLib::IAudioCD InsertedMedia();
 
+	void Eject();
+
 private:
 	winrt::com_ptr<IWMPCdrom> cd;
 };

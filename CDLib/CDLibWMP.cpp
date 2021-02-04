@@ -69,6 +69,11 @@ cdlib::IAudioCD WMPAudioCDDrive::InsertedMedia()
 	return winrt::make<WMPAudioCD>(playlist);
 }
 
+void WMPAudioCDDrive::Eject()
+{
+	cd->eject();
+}
+
 WMPAudioCD::WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& playlist) 
 	: wmpTrackList(playlist),
 	  tracks(winrt::single_threaded_vector<cdlib::IAudioCDTrack>())
