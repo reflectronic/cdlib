@@ -154,6 +154,19 @@ void WMPAudioCDPlayer::Resume()
 	winrt::check_hresult(get_controls()->play());
 }
 
+double WMPAudioCDPlayer::Volume()
+{
+	long volume;
+	winrt::check_hresult(get_settings()->get_volume(&volume));
+	return static_cast<double>(volume) / 100.0;
+}
+
+void WMPAudioCDPlayer::Volume(double value)
+{
+	long volume = static_cast<long>(value * 100);
+	winrt::check_hresult(get_settings()->put_volume(volume));
+}
+
 wf::TimeSpan to_timespan(double seconds)
 {
 	return std::chrono::duration_cast<wf::TimeSpan>(std::chrono::duration<double>(seconds));

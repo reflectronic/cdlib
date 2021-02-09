@@ -40,6 +40,7 @@ namespace CDLib
 		void Pause();
 
 		Windows.Foundation.TimeSpan CurrentPosition{ get; };
+		Double Volume;
 		void Seek(Windows.Foundation.TimeSpan position);
 
 		event FinishedPlayingTrackHandler FinishedPlayingTrack;

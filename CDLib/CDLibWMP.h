@@ -17,6 +17,9 @@ struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAud
 	void Pause();
 	void Resume();
 
+	double Volume();
+	void Volume(double value);
+
 	wf::TimeSpan CurrentPosition();
 	void Seek(wf::TimeSpan position);
 
@@ -41,6 +44,13 @@ private:
 		winrt::com_ptr<IWMPControls> controls;
 		winrt::check_hresult(player->get_controls(controls.put()));
 		return controls;
+	}
+
+	inline winrt::com_ptr<IWMPSettings> WMPAudioCDPlayer::get_settings()
+	{
+		winrt::com_ptr<IWMPSettings> settings;
+		winrt::check_hresult(player->get_settings(settings.put()));
+		return settings;
 	}
 };
 
