@@ -2,6 +2,7 @@
 #include "CDLibWMP.h"
 
 #include <wmpids.h>
+#include <sbe.h>
 
 namespace cdlib = winrt::CDLib;
 
@@ -48,7 +49,7 @@ struct WMPAudioCDPlayerEventHandler : winrt::implements<WMPAudioCDPlayerEventHan
 				{
 					long index = pDispParams->rgvarg[0].lVal;
 					auto drive = cdPlayer->drives.GetAt(index);
-					drive.as<WMPAudioCDDrive>()->mediaChangedEvent(drive);	
+					drive.as<WMPAudioCDDrive>()->mediaChangedEvent(drive);
 					break;
 				}
 
@@ -98,7 +99,7 @@ WMPAudioCDPlayer::WMPAudioCDPlayer(winrt::com_ptr<IWMPPlayer> const& wmpPlayer)
 	 : player(wmpPlayer),
 	   drives(winrt::single_threaded_vector<cdlib::IAudioCDDrive>())
 {
-	player->get_cdromCollection(cdromCollection.put());
+	winrt::check_hresult(player->get_cdromCollection(cdromCollection.put()));
 
 	long count;
 	winrt::check_hresult(cdromCollection->get_count(&count));
@@ -119,7 +120,7 @@ WMPAudioCDPlayer::WMPAudioCDPlayer(winrt::com_ptr<IWMPPlayer> const& wmpPlayer)
 		thisPtr.copy_from(this);
 
 		eventHandler = winrt::make_self<WMPAudioCDPlayerEventHandler>(thisPtr);
-		connectionPoint->Advise(eventHandler.get(), &adviseCookie);
+		winrt::check_hresult(connectionPoint->Advise(eventHandler.get(), &adviseCookie));
 	}
 }
 
@@ -203,7 +204,7 @@ WMPAudioCDDrive::WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> const& cdrom)
 winrt::Windows::Foundation::IReference<char16_t> WMPAudioCDDrive::DriveLetter()
 {
 	wil::unique_bstr name;
-	cd->get_driveSpecifier(name.put());
+	winrt::check_hresult(cd->get_driveSpecifier(name.put()));
 	
 	if (SysStringLen(name.get()) < 1)
 	{
@@ -246,11 +247,7 @@ WMPAudioCD::WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& playlist)
 	{
 		winrt::com_ptr<IWMPMedia> track;
 		winrt::check_hresult(playlist->get_item(i, track.put()));
-
-		winrt::com_ptr<WMPAudioCD> thisPtr;
-		thisPtr.copy_from(this);
-
-		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1));
+		tracks.Append(winrt::make<WMPAudioCDTrack>(track));
 	}
 }
 
@@ -260,28 +257,50 @@ winrt::Windows::Foundation::Collections::IVectorView<cdlib::IAudioCDTrack> WMPAu
 }
 
 template<typename T>
-winrt::hstring get_name(winrt::com_ptr<T> const& namedObj)
+winrt::hstring get_attribute(winrt::com_ptr<T> const& item, PCWSTR attribute)
 {
-	wil::unique_bstr name;
-	winrt::check_hresult(namedObj->get_name(name.put()));
+	auto name = wil::make_bstr(attribute);
+	wil::unique_bstr value;
 
-	return winrt::to_hstring(name.get());
+	item->getItemInfo(name.get(), value.put());
+	return winrt::to_hstring(value.get());
 }
 
-winrt::hstring WMPAudioCD::Name()
+
+winrt::hstring WMPAudioCD::Title()
 {
-	return get_name(wmpTrackList);
+	return get_attribute(wmpTrackList, g_wszStreamBufferRecordingTitle);
 }
 
-WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track)
-	: wmpMedia(media),
-	  trackNumber(track)
+WMPAudioCDTrack::WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media)
+	: wmpMedia(media)
 {
 }
 
-winrt::hstring WMPAudioCDTrack::Name()
+winrt::hstring WMPAudioCDTrack::Title()
 {
-	return get_name(wmpMedia);
+	return get_attribute(wmpMedia, g_wszStreamBufferRecordingTitle);
+}
+
+winrt::hstring WMPAudioCDTrack::AlbumTitle()
+{
+	return get_attribute(wmpMedia, g_wszStreamBufferRecordingAlbumTitle);
+}
+
+winrt::hstring WMPAudioCDTrack::Artist()
+{
+	return get_attribute(wmpMedia, g_wszStreamBufferRecordingAuthor);
+}
+
+winrt::hstring WMPAudioCDTrack::AlbumCoverUrl()
+{
+	return get_attribute(wmpMedia, g_wszStreamBufferRecordingAlbumCoverURL);
+}
+
+uint32_t WMPAudioCDTrack::TrackNumber()
+{
+	auto string = get_attribute(wmpMedia, g_wszStreamBufferRecordingTrackNumber);
+	return std::wcstoul(string.c_str(), nullptr, 10);
 }
 
 wf::TimeSpan WMPAudioCDTrack::Duration()
@@ -289,9 +308,4 @@ wf::TimeSpan WMPAudioCDTrack::Duration()
 	double seconds;
 	winrt::check_hresult(wmpMedia->get_duration(&seconds));
 	return to_timespan(seconds);
-}
-
-uint32_t WMPAudioCDTrack::TrackNumber()
-{
-	return trackNumber;
 }

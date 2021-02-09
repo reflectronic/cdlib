@@ -2,7 +2,11 @@ namespace CDLib
 {
 	interface IAudioCDTrack
 	{
-		String Name{ get; };
+		String Title{ get; };
+		String AlbumTitle{ get; };
+		String Artist{ get; };
+		String AlbumCoverUrl{ get; };
+
 		Windows.Foundation.TimeSpan Duration{ get; };
 		UInt32 TrackNumber{ get; };
 	};
@@ -10,7 +14,7 @@ namespace CDLib
 	interface IAudioCD
 	{
 		IVectorView<IAudioCDTrack> Tracks{ get; };
-		String Name{ get; };
+		String Title{ get; };
 	};
 
 	delegate void MediaChangedEventHandler(IAudioCDDrive sender);
