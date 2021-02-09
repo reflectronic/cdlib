@@ -237,7 +237,7 @@ WMPAudioCD::WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& playlist)
 		winrt::com_ptr<WMPAudioCD> thisPtr;
 		thisPtr.copy_from(this);
 
-		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1, thisPtr));
+		tracks.Append(winrt::make<WMPAudioCDTrack>(track, i + 1));
 	}
 }
 
