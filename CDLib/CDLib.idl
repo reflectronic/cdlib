@@ -13,13 +13,23 @@ namespace CDLib
 		String Name{ get; };
 	};
 
+	delegate void MediaChangedEventHandler(IAudioCDDrive sender);
+
 	interface IAudioCDDrive
 	{
 		Windows.Foundation.IReference<Char> DriveLetter{ get; };
 		void Eject();
 
+		// TODO: Consider having separate events. This probably would require use of another API.
+		// event MediaChangedEventHandler MediaInserted;
+		// event MediaChangedEventHandler MediaEjected;
+
+		event MediaChangedEventHandler MediaChanged;
+
 		IAudioCD InsertedMedia{ get; };
 	};
+
+	delegate void FinishedPlayingTrackHandler();
 
 	interface IAudioCDPlayer requires Windows.Foundation.IClosable
 	{
@@ -28,7 +38,29 @@ namespace CDLib
 		void PlayTrack(IAudioCDTrack track);
 		void Resume();
 		void Pause();
+
+		Windows.Foundation.TimeSpan CurrentPosition{ get; };
+		void Seek(Windows.Foundation.TimeSpan position);
+
+		event FinishedPlayingTrackHandler FinishedPlayingTrack;
+
+		// WMP doesn't support hot-pluggable drives.
+		// TODO: Revisit in the future, potentially by recreating the player whenever new drives are detected.
+		// event Windows.Foundation.TypedEventHandler<IAudioCDPlayer, AudioCDDriveChangedEventArgs> DrivesChanged;
 	};
+
+	// enum DriveChange
+	// {
+	//     Added,
+	//     Removed
+	// };
+
+	// runtimeclass AudioCDDriveChangedEventArgs
+	// {
+	//     DriveChange Change{ get; };
+	//     IAudioCDDrive Drive{ get; };
+	// };
+
 
 	static runtimeclass AudioCDPlayer
 	{

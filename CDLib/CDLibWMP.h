@@ -3,9 +3,12 @@
 #include "AudioCDPlayer.h"
 #include <wmp.h>
 
-struct WMPAudioCDPlayerPrivate;
+struct WMPAudioCDPlayerEventHandler;
+
 struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAudioCDPlayer, winrt::non_agile>
 {
+	friend WMPAudioCDPlayerEventHandler;
+
 	WMPAudioCDPlayer(winrt::com_ptr<IWMPPlayer> const& player);
 
 	wfc::IVectorView<winrt::CDLib::IAudioCDDrive> GetDrives();
@@ -14,11 +17,24 @@ struct WMPAudioCDPlayer : winrt::implements<WMPAudioCDPlayer, winrt::CDLib::IAud
 	void Pause();
 	void Resume();
 
+	wf::TimeSpan CurrentPosition();
+	void Seek(wf::TimeSpan position);
+
+	winrt::event_token FinishedPlayingTrack(winrt::CDLib::FinishedPlayingTrackHandler const& handler);
+	void FinishedPlayingTrack(winrt::event_token const& token) noexcept;
+
 private:
 	winrt::com_ptr<IWMPCdromCollection> cdromCollection;
 	winrt::com_ptr<IWMPPlayer> player;
+
+	winrt::com_ptr<WMPAudioCDPlayerEventHandler> eventHandler;
+	winrt::com_ptr<IConnectionPoint> connectionPoint;
+	DWORD adviseCookie;
+
 	wfc::IVector<winrt::CDLib::IAudioCDDrive> drives;
 	winrt::CDLib::IAudioCDTrack playingTrack;
+
+	winrt::event<winrt::CDLib::FinishedPlayingTrackHandler> finishedPlayingTrackEvent;
 
 	inline winrt::com_ptr<IWMPControls> WMPAudioCDPlayer::get_controls()
 	{
@@ -30,20 +46,27 @@ private:
 
 struct WMPAudioCDDrive : winrt::implements<WMPAudioCDDrive, winrt::CDLib::IAudioCDDrive, winrt::non_agile>
 {
+	friend WMPAudioCDPlayerEventHandler;
+
 	WMPAudioCDDrive(winrt::com_ptr<IWMPCdrom> const& cdrom);
 
     wf::IReference<char16_t> DriveLetter();
 	winrt::CDLib::IAudioCD InsertedMedia();
 
+	winrt::event_token MediaChanged(winrt::CDLib::MediaChangedEventHandler const& handler);
+	void MediaChanged(winrt::event_token const& token) noexcept;
+
 	void Eject();
 
 private:
 	winrt::com_ptr<IWMPCdrom> cd;
+
+	winrt::event<winrt::CDLib::MediaChangedEventHandler> mediaChangedEvent;
 };
 
 struct WMPAudioCD : winrt::implements<WMPAudioCD, winrt::CDLib::IAudioCD, winrt::non_agile>
 {
-	friend struct WMPAudioCDPlayer;
+	friend WMPAudioCDPlayer;
 
 	WMPAudioCD(winrt::com_ptr<IWMPPlaylist> const& tracks);
 
@@ -58,16 +81,15 @@ private:
 
 struct WMPAudioCDTrack : winrt::implements<WMPAudioCDTrack, winrt::CDLib::IAudioCDTrack, winrt::non_agile>
 {
-	friend struct WMPAudioCDPlayer;
+	friend WMPAudioCDPlayer;
 
-	WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track, winrt::CDLib::IAudioCD parentCd);
+	WMPAudioCDTrack(winrt::com_ptr<IWMPMedia> const& media, uint32_t track);
 
 	winrt::hstring Name();
 	winrt::Windows::Foundation::TimeSpan Duration();
 	uint32_t TrackNumber();
 
 private:
-	winrt::CDLib::IAudioCD parentCd;
 	winrt::com_ptr<IWMPMedia> wmpMedia;
 	uint32_t trackNumber;
 };
