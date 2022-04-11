@@ -39,14 +39,14 @@ private:
 
 	winrt::event<winrt::CDLib::FinishedPlayingTrackHandler> finishedPlayingTrackEvent;
 
-	inline winrt::com_ptr<IWMPControls> WMPAudioCDPlayer::get_controls()
+	inline winrt::com_ptr<IWMPControls> get_controls()
 	{
 		winrt::com_ptr<IWMPControls> controls;
 		winrt::check_hresult(player->get_controls(controls.put()));
 		return controls;
 	}
 
-	inline winrt::com_ptr<IWMPSettings> WMPAudioCDPlayer::get_settings()
+	inline winrt::com_ptr<IWMPSettings> get_settings()
 	{
 		winrt::com_ptr<IWMPSettings> settings;
 		winrt::check_hresult(player->get_settings(settings.put()));
